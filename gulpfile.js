@@ -197,7 +197,7 @@ const rollupUmd = function(name, path) {
       // See "external" in https://rollupjs.org/#core-functionality
       external: [
         'rxjs',
-        'formiojs',
+        'formiojs-proyectoscolfuturo',
         '@angular/core',
         '@angular/common',
         '@angular/router'
