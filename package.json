@@ -1,6 +1,6 @@
 {
-  "name": "angular-formio",
-  "version": "2.0.0-rc.2",
+  "name": "angular-formio-proyectoscolfuturo",
+  "version": "1.0.1",
   "scripts": {
     "build": "gulp build",
     "build:watch": "gulp",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/formio/angular-formio"
+    "url": "https://github.com/proyectoscolfuturo/angular-formio.git"
   },
   "author": {
     "name": "Travis Tidwell",

@@ -1,9 +1,9 @@
 {
-  "name": "angular-formio",
+  "name": "angular-formio-proyectoscolfuturo",
   "version": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/formio/angular-formio"
+    "url": "https://github.com/proyectoscolfuturo/angular-formio.git"
   },
   "author": {
     "name": "Travis Tidwell",

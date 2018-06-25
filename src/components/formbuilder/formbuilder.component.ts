@@ -12,7 +12,7 @@ import {
   FormioForm,
   FormioOptions
 } from '../../formio.common';
-import { Formio } from 'formiojs';
+import { Formio } from 'formiojs-proyectoscolfuturo';
 
 /* tslint:disable */
 @Component({
