@@ -102,7 +102,7 @@
     "zone.js": "^0.8.14"
   },
   "dependencies": {
-    "formiojs-proyectoscolfuturo": "^1.0.8",
+    "formiojs-proyectoscolfuturo": "^1.0.9",
     "lodash": "^4.17.5",
     "ngx-bootstrap": "^2.0.3"
   }
