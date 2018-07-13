@@ -41,6 +41,7 @@ export class FormioComponent implements OnInit, OnChanges {
   @Input() service?: FormioService;
   @Input() options?: FormioOptions;
   @Input() readOnly ? = false;
+  @Input() frontOffice ? = false;
   @Input() viewOnly ? = false;
   @Input() hideComponents?: string[];
   @Input() refresh?: EventEmitter<FormioRefreshValue>;
@@ -109,6 +110,7 @@ export class FormioComponent implements OnInit, OnChanges {
         icons: this.config ? this.config.icons : '',
         noAlerts: true,
         readOnly: this.readOnly,
+        frontOffice: this.frontOffice,
         viewAsHtml: this.viewOnly,
         i18n: get(this.options, 'i18n', null),
         fileService: get(this.options, 'fileService', null),
