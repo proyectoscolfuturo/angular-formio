@@ -7,24 +7,27 @@ end application. This allows forms to be dynamically built using JSON schemas.
 Running Demo
 --------------------------
 To run a demo of the Form.io Angular renderer, please follow these steps.
-
- 1. Download this repo to your local computer.
- 2. With your terminal, type ```npm install```
- 3. Now type ```npm run demo```
+ 
+ 1. Make sure you have the [Angular CLI](https://angular.io) installed on your machine.
+ 2. Download the [Angular Demo Application](https://github.com/formio/angular-demo) to your computer.
+ 3. With your terminal, type ```npm install```
+ 4. Now type ```ng serve```
  
 This will startup an example application where you can see all the features provided by this module.
+
+Here is the hosted demo application [https://formio.github.io/angular-demo/](https://formio.github.io/angular-demo)
 
 Using within your application
 ---------------------------
 You can easily render a form within your Angular 4 application by referencing the URL of that form as follows.
 
-```
+```html
 <formio src='https://examples.form.io/example'></formio>
 ```
 
 You can also pass the JSON form directly to the renderer as follows.
 
-```
+```html
 <formio [form]='{
     "title": "My Test Form",
     "components": [
@@ -119,10 +122,10 @@ npm install --save angular-formio
 
 You can now include the module in your Angular application like so.
 
-```
+```js
 import { FormioModule } from 'angular-formio';
 @NgModule({
-    imports: [ BrowserModule, ReactiveFormsModule, FormioModule ],
+    imports: [ BrowserModule, CommonModule, FormioModule ],
     declarations: [ AppComponent ],
     bootstrap: [ AppComponent ]
 })
@@ -134,11 +137,17 @@ Included Libraries
 This library is a combination of multiple libraries that enable rapid Serverless application development using Form.io. These libraries are as follows.
 
 1. [Form Renderer](https://github.com/formio/angular-formio/wiki/Form-Renderer) - The form renderer in Angular
-2. [Authentication](https://github.com/formio/angular-formio/wiki/User-Authentication) - Allows an easy way to provide Form.io authentication into your application.
-3. [Resource](https://github.com/formio/angular-formio/wiki/Resource-Management) - A way to include the Resources within your application with full CRUDI support (Create, Read, Update, Delete, Index)
-4. [Data Table (Grid)](https://github.com/formio/angular-formio/wiki/Data-Table) - A way to render data within a Table format, which includes pagination, sorting, etc.
+2. [Form Builder](https://github.com/formio/angular-formio/wiki/Form-Builder) - The form builder in Angular
+3. [Form Manager](https://github.com/formio/angular-formio/wiki/Form-Mananger) - The form management application used to manage forms.
+4. [Authentication](https://github.com/formio/angular-formio/wiki/User-Authentication) - Allows an easy way to provide Form.io authentication into your application.
+5. [Resource](https://github.com/formio/angular-formio/wiki/Resource-Management) - A way to include the Resources within your application with full CRUDI support (Create, Read, Update, Delete, Index)
+6. [Data Table (Grid)](https://github.com/formio/angular-formio/wiki/Data-Table) - A way to render data within a Table format, which includes pagination, sorting, etc.
 
 Click on each of those links to read more about how they work and how to utilize them to their fullest potential.
+
+Demo Application
+----------
+If you would like to run a demonstration of all the features of this module, then you can check out the [Angular Demo Application](https://github.com/formio/angular-demo), which is the code behind the following hosted application @ [https://formio.github.io/angular-demo](https://formio.github.io/angular-demo)
 
 Application Starter Kit
 ----------

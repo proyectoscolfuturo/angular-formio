@@ -2,6 +2,7 @@ import {
   Component,
   Input,
   AfterViewInit,
+  OnChanges,
   ViewEncapsulation,
   Optional,
   ElementRef,
@@ -12,7 +13,12 @@ import {
   FormioForm,
   FormioOptions
 } from '../../formio.common';
-import { Formio } from 'formiojs-proyectoscolfuturo';
+// <<<<<<< HEAD
+// import { Formio } from 'formiojs-proyectoscolfuturo';
+// =======
+import { Formio, FormBuilder } from 'formiojs-proyectoscolfuturo';
+import { assign } from 'lodash';
+// >>>>>>> upstream/master
 
 /* tslint:disable */
 @Component({
@@ -22,10 +28,11 @@ import { Formio } from 'formiojs-proyectoscolfuturo';
   encapsulation: ViewEncapsulation.None
 })
 /* tslint:enable */
-export class FormBuilderComponent implements AfterViewInit {
+export class FormBuilderComponent implements AfterViewInit, OnChanges {
   public ready: Promise<object>;
   public readyResolve: any;
   public formio: any;
+  public builder: FormBuilder;
   @Input() form?: FormioForm;
   @Input() options?: FormioOptions;
   @Output() change?: EventEmitter<object>;
@@ -47,8 +54,24 @@ export class FormBuilderComponent implements AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    Formio.builder(this.builderElement.nativeElement, this.form, this.options).then((instance) => {
+  setDisplay(display: String) {
+    return this.builder.setDisplay(display);
+  }
+
+  buildForm(form) {
+    if (!form || !this.builderElement || !this.builderElement.nativeElement) {
+      return;
+    }
+
+    if (this.builder) {
+      return this.builder.instance.form = form;
+    }
+    this.builder = new Formio.FormBuilder(
+      this.builderElement.nativeElement,
+      form,
+      assign({icons: 'fontawesome'}, this.options || {})
+    );
+    this.builder.render().then((instance) => {
       this.formio = instance;
       instance.on('saveComponent', () => this.change.emit({
         type: 'saveComponent',
@@ -65,5 +88,15 @@ export class FormBuilderComponent implements AfterViewInit {
       this.readyResolve(instance);
       return instance;
     });
+  }
+
+  ngOnChanges(changes: any) {
+    if (changes.form && changes.form.currentValue) {
+      this.buildForm(changes.form.currentValue || {components: []});
+    }
+  }
+
+  ngAfterViewInit() {
+    this.buildForm(this.form);
   }
 }

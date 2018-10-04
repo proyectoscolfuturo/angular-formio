@@ -21,8 +21,7 @@ export class FormioResourceCreateComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Start with fresh data.
-    this.service.initialize();
+    this.service.setContext(this.route);
   }
 
   onSubmit(submission: any) {

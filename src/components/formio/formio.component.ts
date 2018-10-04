@@ -32,14 +32,16 @@ import { Formio } from 'formiojs-proyectoscolfuturo';
 })
 /* tslint:enable */
 export class FormioComponent implements OnInit, OnChanges {
-  public ready: Promise<object>;
-  public readyResolve: any;
+  private formioReady: Promise<Formio>;
+  private formioReadyResolve: any;
   @Input() form?: FormioForm;
   @Input() submission?: any = {};
   @Input() src?: string;
   @Input() url?: string;
   @Input() service?: FormioService;
   @Input() options?: FormioOptions;
+  @Input() formioOptions?: any;
+  @Input() renderOptions?: any;
   @Input() readOnly ? = false;
   @Input() frontOffice ? = false;
   @Input() viewOnly ? = false;
@@ -59,11 +61,13 @@ export class FormioComponent implements OnInit, OnChanges {
   @Output() invalid: EventEmitter<boolean>;
   @Output() errorChange: EventEmitter<any>;
   @Output() formLoad: EventEmitter<any>;
+  @Output() ready: EventEmitter<FormioComponent>;
   @ViewChild('formio') formioElement?: ElementRef;
 
+  private submitting: boolean;
   public formio: any;
   public initialized: boolean;
-  private alerts: FormioAlerts;
+  public alerts: FormioAlerts;
   constructor(
     private loader: FormioLoader,
     @Optional() private config: FormioAppConfig
@@ -75,10 +79,11 @@ export class FormioComponent implements OnInit, OnChanges {
       console.warn('You must provide an AppConfig within your application!');
     }
 
-    this.ready = new Promise((resolve: any) => {
-      this.readyResolve = resolve;
+    this.formioReady = new Promise(ready => {
+      this.formioReadyResolve = ready;
     });
 
+    this.submitting = false;
     this.alerts = new FormioAlerts();
     this.beforeSubmit = new EventEmitter();
     this.prevPage = new EventEmitter();
@@ -90,6 +95,7 @@ export class FormioComponent implements OnInit, OnChanges {
     this.customEvent = new EventEmitter();
     this.render = new EventEmitter();
     this.formLoad = new EventEmitter();
+    this.ready = new EventEmitter();
     this.initialized = false;
     this.alerts.alerts = [];
   }
@@ -104,25 +110,25 @@ export class FormioComponent implements OnInit, OnChanges {
 
     // Create the form.
     return Formio.createForm(
-      get(this.formioElement, 'nativeElement', null),
+      this.formioElement ? this.formioElement.nativeElement : null,
       this.form,
-      {
-        icons: this.config ? this.config.icons : '',
-        noAlerts: true,
+      assign({}, {
+        icons: get(this.config, 'icons', 'fontawesome'),
+        noAlerts: get(this.options, 'noAlerts', true),
         readOnly: this.readOnly,
         frontOffice: this.frontOffice,
         viewAsHtml: this.viewOnly,
         i18n: get(this.options, 'i18n', null),
         fileService: get(this.options, 'fileService', null),
         hooks: this.hooks
-      }
-    ).then((formio: any) => {
+      }, this.renderOptions || {})
+    ).then((formio: Formio) => {
       this.formio = formio;
       if (this.url) {
-        this.formio.url = this.url;
+        this.formio.setUrl(this.url, this.formioOptions || {});
       }
       if (this.src) {
-        this.formio.url = this.src;
+        this.formio.setUrl(this.src, this.formioOptions || {});
       }
       this.formio.nosubmit = true;
       this.formio.on('prevPage', (data: any) => this.onPrevPage(data));
@@ -140,7 +146,8 @@ export class FormioComponent implements OnInit, OnChanges {
         this.formLoad.emit(loadedForm)
       );
       this.loader.loading = false;
-      this.readyResolve(this.formio);
+      this.ready.emit(this);
+      this.formioReadyResolve(this.formio);
       return this.formio;
     });
   }
@@ -232,14 +239,24 @@ export class FormioComponent implements OnInit, OnChanges {
     }
   }
   onRefresh(refresh: FormioRefreshValue) {
-    this.ready.then(() => {
-      switch (refresh.property) {
-        case 'submission':
-          this.formio.submission = refresh.value;
-          break;
-        case 'form':
-          this.formio.form = refresh.value;
-          break;
+    this.formioReady.then(() => {
+      if (refresh.form) {
+        this.formio.setForm(refresh.form).then(() => {
+          if (refresh.submission) {
+            this.formio.setSubmission(refresh.submission);
+          }
+        });
+      } else if (refresh.submission) {
+        this.formio.setSubmission(refresh.submission);
+      } else {
+        switch (refresh.property) {
+          case 'submission':
+            this.formio.submission = refresh.value;
+            break;
+          case 'form':
+            this.formio.form = refresh.value;
+            break;
+        }
       }
     });
   }
@@ -250,7 +267,7 @@ export class FormioComponent implements OnInit, OnChanges {
       this.setForm(changes.form.currentValue);
     }
 
-    this.ready.then(() => {
+    this.formioReady.then(() => {
       if (changes.submission && changes.submission.currentValue) {
         this.formio.submission = changes.submission.currentValue;
       }
@@ -269,6 +286,7 @@ export class FormioComponent implements OnInit, OnChanges {
     this.nextPage.emit(data);
   }
   onSubmit(submission: any, saved: boolean) {
+    this.submitting = false;
     if (saved) {
       this.formio.emit('submitDone', submission);
     }
@@ -281,7 +299,9 @@ export class FormioComponent implements OnInit, OnChanges {
     }
   }
   onError(err: any) {
+    this.loader.loading = false;
     this.alerts.setAlerts([]);
+    this.submitting = false;
     if (!err) {
       return;
     }
@@ -294,7 +314,7 @@ export class FormioComponent implements OnInit, OnChanges {
 
     // Iterate through each one and set the alerts array.
     each(err, (error: any) => {
-      this.alerts.setAlert({
+      this.alerts.addAlert({
         type: 'danger',
         message: error.message || error.toString()
       });
@@ -313,6 +333,11 @@ export class FormioComponent implements OnInit, OnChanges {
     }
   }
   submitForm(submission: any) {
+    // Keep double submits from occurring...
+    if (this.submitting) {
+      return;
+    }
+    this.submitting = true;
     this.beforeSubmit.emit(submission);
 
     // if they provide a beforeSubmit hook, then allow them to alter the submission asynchronously

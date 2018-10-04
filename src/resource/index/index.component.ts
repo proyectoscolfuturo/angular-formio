@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormioResourceService } from '../resource.service';
 import { FormioResourceConfig } from '../resource.config';
@@ -10,26 +10,33 @@ import { each } from 'lodash';
 export class FormioResourceIndexComponent implements OnInit {
   public gridSrc?: string;
   public gridQuery: any;
+  public formTitle: String;
   constructor(
     public service: FormioResourceService,
     public route: ActivatedRoute,
     public router: Router,
-    public config: FormioResourceConfig
-  ) {}
+    public config: FormioResourceConfig,
+    private ref: ChangeDetectorRef
+  ) {
+    this.formTitle = '';
+  }
 
   ngOnInit() {
-    this.service.initialize();
     this.gridQuery = {};
+    this.service.setContext(this.route);
+    this.service.formLoaded.then(() => {
+      this.formTitle = this.service.form.title;
+      this.ref.detectChanges();
+    });
     if (
       this.service &&
-      this.service.onParents &&
       this.config.parents &&
       this.config.parents.length
     ) {
       // Wait for the parents to load before loading this grid.
-      this.service.onParents.subscribe((parents: any) => {
+      this.service.parentsLoaded.then((parents: any) => {
         each(parents, (parent: any) => {
-          if (parent) {
+          if (parent && parent.filter) {
             this.gridQuery['data.' + parent.name + '._id'] =
               parent.resource._id;
           }
@@ -45,5 +52,9 @@ export class FormioResourceIndexComponent implements OnInit {
 
   onSelect(row: any) {
     this.router.navigate([row._id, 'view'], { relativeTo: this.route });
+  }
+
+  onCreateItem() {
+    this.router.navigate(['new'], {relativeTo: this.route});
   }
 }
