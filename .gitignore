@@ -6,6 +6,8 @@ npm-debug.log
 src/*.js
 src/*.map
 src/*.d.ts
+.tmp
+yarn-error.log
 
 # JetBrains
 .idea
