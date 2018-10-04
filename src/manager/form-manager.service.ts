@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormioAppConfig } from '../formio.config';
 import { FormManagerConfig } from './form-manager.config';
-import { Formio } from 'formiojs';
+import { Formio } from 'formiojs-proyectoscolfuturo';
 import { ActivatedRoute } from '@angular/router';
 
 @Injectable()

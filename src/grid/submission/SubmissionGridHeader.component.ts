@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Formio, Utils, Components } from 'formiojs';
+import { Formio, Utils, Components } from 'formiojs-proyectoscolfuturo';
 import { GridHeaderComponent } from '../GridHeaderComponent';
 
 @Component({

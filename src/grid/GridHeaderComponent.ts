@@ -1,5 +1,5 @@
 import { Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
-import { Formio } from 'formiojs';
+import { Formio } from 'formiojs-proyectoscolfuturo';
 
 export class GridHeaderComponent {
   @Output() sort: EventEmitter<any>;

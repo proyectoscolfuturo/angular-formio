@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { each, get } from 'lodash';
-import { Formio } from 'formiojs';
+import { Formio } from 'formiojs-proyectoscolfuturo';
 import { GridBodyComponent } from '../GridBodyComponent';
 
 @Component({
