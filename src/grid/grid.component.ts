@@ -14,15 +14,18 @@ import {
 import { FormioLoader } from '../components/loader/formio.loader';
 import { FormioAlerts } from '../components/alerts/formio.alerts';
 import { assign, each, get } from 'lodash';
+// <<<<<<< HEAD
+// import { Formio } from 'formiojs-proyectoscolfuturo';
+// import FormioUtils from 'formiojs-proyectoscolfuturo/utils';
+// import Components from 'formiojs-proyectoscolfuturo/components/Components';
+// =======
 import { Formio } from 'formiojs-proyectoscolfuturo';
-import FormioUtils from 'formiojs-proyectoscolfuturo/utils';
-import Components from 'formiojs-proyectoscolfuturo/components/Components';
-// import { Formio } from 'formiojs';
 import { GridHeaderComponent } from './GridHeaderComponent';
 import { GridBodyComponent } from './GridBodyComponent';
 import { GridFooterComponent } from './GridFooterComponent';
 import FormComponents from './form/index';
 import SubmissionComponents from './submission/index';
+// >>>>>>> upstream/master
 
 @Component({
   selector: 'formio-grid',
