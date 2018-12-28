@@ -16,29 +16,24 @@ import _ from 'lodash';
 
 @Injectable()
 export class FormioResourceService {
+  public initialized = false;
   public form: any;
   public resource: any;
   public resourceUrl?: string;
   public formUrl: string;
   public formFormio: any;
   public formio: any;
-  public refresh: EventEmitter<FormioRefreshValue> = new EventEmitter();
+  public refresh: EventEmitter<FormioRefreshValue>;
 
   public resourceLoading?: Promise<any>;
   public resourceLoaded?: Promise<any>;
-  public resourceResolve: any;
-  public resourceReject: any;
   public resourceId?: string;
   public resources: any;
 
   public formLoading?: Promise<any>;
-  public formLoaded: Promise<any> = new Promise(() => {});
+  public formLoaded: Promise<any>;
   public formResolve: any;
   public formReject: any;
-
-  public parentsLoaded?: Promise<any>;
-  public parentsResolve: any;
-  public parentsReject: any;
 
   constructor(
     public appConfig: FormioAppConfig,
@@ -46,6 +41,23 @@ export class FormioResourceService {
     public loader: FormioLoader,
     @Optional() public resourcesService: FormioResources
   ) {
+    this.refresh = new EventEmitter();
+    this.formLoaded = new Promise((resolve: any, reject: any) => {
+      this.formResolve = resolve;
+      this.formReject = reject;
+    });
+    this.init();
+  }
+
+  initialize() {
+    console.warn('FormioResourceService.initialize() has been deprecated.');
+  }
+
+  init() {
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
     if (this.appConfig && this.appConfig.appUrl) {
       Formio.setBaseUrl(this.appConfig.apiUrl);
       Formio.setProjectUrl(this.appConfig.appUrl);
@@ -56,20 +68,7 @@ export class FormioResourceService {
 
     // Create the form url and load the resources.
     this.formUrl = this.appConfig.appUrl + '/' + this.config.form;
-    this.refresh = new EventEmitter();
     this.resource = { data: {} };
-    this.resourceLoaded = new Promise((resolve: any, reject: any) => {
-      this.resourceResolve = resolve;
-      this.resourceReject = reject;
-    });
-    this.formLoaded = new Promise((resolve: any, reject: any) => {
-      this.formResolve = resolve;
-      this.formReject = reject;
-    });
-    this.parentsLoaded = new Promise((resolve: any, reject: any) => {
-      this.parentsResolve = resolve;
-      this.parentsReject = reject;
-    });
 
     // Add this resource service to the list of all resources in context.
     if (this.resourcesService) {
@@ -77,11 +76,7 @@ export class FormioResourceService {
       this.resources[this.config.name] = this;
     }
 
-    this.loadForm();
-  }
-
-  initialize() {
-    console.warn('FormioResourceService.initialize() has been deprecated.');
+    return this.loadForm();
   }
 
   onError(error: any) {
@@ -104,7 +99,10 @@ export class FormioResourceService {
       this.resourceUrl += '/submission/' + this.resourceId;
     }
     this.formio = new Formio(this.resourceUrl);
-    this.setParents();
+    if (this.resourcesService) {
+      this.resources[this.config.name] = this;
+    }
+    this.loadParents();
   }
 
   loadForm() {
@@ -117,7 +115,7 @@ export class FormioResourceService {
           this.form = form;
           this.formResolve(form);
           this.loader.loading = false;
-          this.setParents();
+          this.loadParents();
           return form;
         },
         (err: any) => this.onFormError(err)
@@ -126,71 +124,69 @@ export class FormioResourceService {
     return this.formLoading;
   }
 
-  setParents() {
-    if (!this.config.parents || !this.config.parents.length || !this.form) {
-      return;
+  loadParents() {
+    if (!this.config.parents || !this.config.parents.length) {
+      return Promise.resolve([]);
     }
-
     if (!this.resourcesService) {
       console.warn(
         'You must provide the FormioResources within your application to use nested resources.'
       );
-      return;
+      return Promise.resolve([]);
     }
+    return this.formLoading.then((form) => {
+      // Iterate through the list of parents.
+      const _parentsLoaded: Array<Promise<any>> = [];
+      this.config.parents.forEach((parent: any) => {
+        const resourceName = parent.resource || parent;
+        const resourceField = parent.field || parent;
+        const filterResource = parent.hasOwnProperty('filter') ? parent.filter : true;
+        if (this.resources.hasOwnProperty(resourceName) && this.resources[resourceName].resourceLoaded) {
+          _parentsLoaded.push(
+            this.resources[resourceName].resourceLoaded.then((resource: any) => {
+              let parentPath = '';
+              Utils.eachComponent(form.components, (component, path) => {
+                if (component.key === resourceField) {
+                  component.hidden = true;
+                  component.clearOnHide = false;
+                  _.set(this.resource.data, path, resource);
+                  parentPath = path;
+                  return true;
+                }
+              });
+              return {
+                name: parentPath,
+                filter: filterResource,
+                resource
+              };
+            })
+          );
+        }
+      });
 
-    // Iterate through the list of parents.
-    const _parentsLoaded: Array<Promise<any>> = [];
-    this.config.parents.forEach((parent: any) => {
-      const resourceName = parent.resource || parent;
-      const resourceField = parent.field || parent;
-      const filterResource = parent.hasOwnProperty('filter') ? parent.filter : true;
-      if (this.resources.hasOwnProperty(resourceName)) {
-        _parentsLoaded.push(
-          this.resources[resourceName].resourceLoaded.then((resource: any) => {
-            let parentPath = '';
-            Utils.eachComponent(this.form.components, (component, path) => {
-              if (component.key === resourceField) {
-                component.hidden = true;
-                component.clearOnHide = false;
-                _.set(this.resource.data, path, resource);
-                parentPath = path;
-                return true;
-              }
-            });
-            return {
-              name: parentPath,
-              filter: filterResource,
-              resource
-            };
-          })
-        );
-      }
-    });
-
-    // When all the parents have loaded, emit that to the onParents emitter.
-    Promise.all(_parentsLoaded).then((parents: any) => {
-      this.parentsResolve(parents);
-      this.refresh.emit({
-        form: this.form,
-        submission: this.resource
+      // When all the parents have loaded, emit that to the onParents emitter.
+      return Promise.all(_parentsLoaded).then((parents: any) => {
+        this.refresh.emit({
+          form: form,
+          submission: this.resource
+        });
+        return parents;
       });
     });
   }
 
   onSubmissionError(err: any) {
-    this.resourceReject(err);
     this.onError(err);
   }
 
   loadResource(route: ActivatedRoute) {
     this.setContext(route);
     this.loader.loading = true;
-    this.resourceLoading = this.formio
+    this.resourceLoading = this.resourceLoaded = this.formio
       .loadSubmission(null, {ignoreCache: true})
       .then(
         (resource: any) => {
           this.resource = resource;
-          this.resourceResolve(resource);
           this.loader.loading = false;
           this.refresh.emit({
             property: 'submission',
