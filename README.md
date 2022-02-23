@@ -4,6 +4,10 @@ This library serves as a Dynamic JSON Powered Form rendering library for [Angula
 providing a JSON schema to a ```<formio>``` Angular component, where that form is dynamically rendered within the front
 end application. This allows forms to be dynamically built using JSON schemas.
 
+Angular Material
+--------------------------
+If you are looking for [Angular Material](https://material.angular.io/) support, then this is within a separate library @ https://github.com/formio/angular-material-formio
+
 Running Demo
 --------------------------
 To run a demo of the Form.io Angular renderer, please follow these steps.
@@ -117,13 +121,13 @@ Usage
 To use this library within your project, you will first need to install it as a dependency.
 
 ```
-npm install --save angular-formio
+npm install --save @formio/angular formiojs
 ```
 
 You can now include the module in your Angular application like so.
 
 ```js
-import { FormioModule } from 'angular-formio';
+import { FormioModule } from '@formio/angular';
 @NgModule({
     imports: [ BrowserModule, CommonModule, FormioModule ],
     declarations: [ AppComponent ],

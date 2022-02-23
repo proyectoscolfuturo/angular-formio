@@ -1,111 +1,73 @@
 {
-  "name": "angular-formio-proyectoscolfuturo",
-  "version": "1.0.18",
-  "scripts": {
-    "build": "gulp build",
-    "build:watch": "gulp",
-    "docs": "npm run docs:build",
-    "docs:build": "compodoc -p tsconfig.json -n angular-formio -d docs --hideGenerator",
-    "docs:serve": "npm run docs:build -- -s",
-    "docs:watch": "npm run docs:build -- -s -w",
-    "lint": "tslint --type-check --project tsconfig.json src/**/*.ts",
-    "lite": "lite-server",
-    "build:demo": "webpack --mode=production",
-    "demo": "gulp build && concurrently --raw \"webpack-dev-server --open\" \"npm run test:watch\"",
-    "publish": "gulp build && gulp package-version && npm publish dist",
-    "test": "tsc && karma start",
-    "test:watch": "karma start --auto-watch"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/formio/angular-formio"
-  },
-  "author": {
-    "name": "Travis Tidwell",
-    "email": "travis@form.io"
-  },
-  "keywords": [
-    "angular"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/formio/angular-formio/issues"
-  },
-  "devDependencies": {
-    "@angular/cli": "^7.1.3",
-    "@angular/common": "^7.1.3",
-    "@angular/compiler": "^7.1.3",
-    "@angular/compiler-cli": "^7.1.3",
-    "@angular/core": "^7.1.3",
-    "@angular/forms": "^7.1.3",
-    "@angular/platform-browser": "^7.1.3",
-    "@angular/platform-browser-dynamic": "^7.1.3",
-    "@angular/router": "^7.1.3",
-    "@compodoc/compodoc": "^1.1.7",
-    "@types/jasmine": "^3.3.2",
-    "@types/node": "^10.12.15",
-    "angular-in-memory-web-api": "^0.7.0",
-    "codelyzer": "^4.5.0",
-    "concurrently": "^4.1.0",
-    "core-js": "^2.6.0",
-    "css-loader": "^1.0.1",
-    "fork-ts-checker-webpack-plugin": "^0.5.2",
-    "fs-extra": "^7.0.1",
-    "gulp": "^3.9.1",
-    "gulp-clean-css": "^4.0.0",
-    "gulp-rename": "^1.4.0",
-    "gulp-replace": "^1.0.0",
-    "gulp-rollup": "^2.15.0",
-    "gulp-sass": "^4.0.2",
-    "html-loader": "^0.5.5",
-    "html-webpack-plugin": "^3.0.7",
-    "jasmine-core": "^3.3.0",
-    "jasmine-spec-reporter": "^4.2.1",
-    "karma": "^3.1.4",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-cli": "^2.0.0",
-    "karma-coverage-istanbul-reporter": "^2.0.4",
-    "karma-jasmine": "^2.0.1",
-    "karma-jasmine-html-reporter": "^1.4.0",
-    "lite-server": "^2.4.0",
-    "node-sass": "^4.11.0",
-    "node-sass-tilde-importer": "^1.0.0",
-    "node-watch": "^0.5.9",
-    "path": "^0.12.7",
-    "prismjs": "^1.15.0",
-    "protractor": "^5.4.1",
-    "rollup": "^0.68.0",
-    "run-sequence": "^2.2.1",
-    "rxjs": "^6.3.3",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.1",
-    "systemjs": "^2.1.1",
-    "ts-loader": "^5.3.1",
-    "ts-node": "^7.0.1",
-    "tsickle": "^0.34.0",
-    "tslint": "^5.11.0",
-    "tslint-loader": "^3.6.0",
-    "typescript": "<3.2.0",
-    "url-loader": "^1.1.2",
-    "webpack": "^4.27.1",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.10",
-    "zone.js": "^0.8.14"
-  },
-  "engines": {
-    "node": ">=6.0.0"
-  },
-  "peerDependencies": {
-    "@angular/core": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0",
-    "@angular/common": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0",
-    "@angular/forms": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0",
-    "@angular/router": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0",
-    "rxjs": "^5.5.2 || ^6.0.0",
-    "zone.js": "^0.8.26"
-  },
-  "dependencies": {
-    "formiojs-proyectoscolfuturo": "^1.0.21",
-    "lodash": "^4.17.11",
-    "ngx-bootstrap": "^3.1.3"
-  }
+    "name": "angular-formio-proyectoscolfuturo",
+    "version": "1.0.25",
+    "scripts": {
+        "ng": "ng",
+        "build": "ng build angular-formio && npm run version",
+        "build:watch": "ng build angular-formio --watch",
+        "build:prod": "ng build angular-formio --configuration production && npm run version",
+        "version": "VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\\\",]//g' | tr -d '[[:space:]]') && ./node_modules/replace-in-file/bin/cli.js \"VERSION\" \"$VERSION\" dist/angular-formio/package.json",
+        "docs": "npm run docs:build",
+        "docs:build": "compodoc -p tsconfig.json -n angular-formio -d docs --hideGenerator",
+        "docs:serve": "npm run docs:build -- -s",
+        "docs:watch": "npm run docs:build -- -s -w",
+        "publish": "npm run build:prod && npm publish dist/angular-formio",
+        "test": "ng test",
+        "lint": "ng lint"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/proyectoscolfuturo/angular-formio"
+    },
+    "author": {
+        "name": "Travis Tidwell",
+        "email": "travis@form.io"
+    },
+    "keywords": [
+        "angular"
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/formio/angular-formio/issues"
+    },
+    "engines": {
+        "node": ">=6.0.0"
+    },
+    "devDependencies": {
+        "@angular-devkit/build-angular": "^13.0.2",
+        "@angular/animations": "^13.0.1",
+        "@angular/cli": "^13.0.2",
+        "@angular/common": "^13.0.1",
+        "@angular/compiler": "^13.0.1",
+        "@angular/compiler-cli": "^13.0.1",
+        "@angular/core": "^13.0.1",
+        "@angular/elements": "^13.0.1",
+        "@angular/forms": "^13.0.1",
+        "@angular/platform-browser": "^13.0.1",
+        "@angular/platform-browser-dynamic": "^13.0.1",
+        "@angular/router": "^13.0.1",
+        "@compodoc/compodoc": "^1.1.16",
+        "@types/jasmine": "^3.10.2",
+        "@types/jasminewd2": "^2.0.10",
+        "@types/node": "^15.6.1",
+        "codelyzer": "^6.0.2",
+        "formiojs-proyectoscolfuturo": "1.0.53",
+        "jasmine-core": "^3.10.1",
+        "jasmine-spec-reporter": "^7.0.0",
+        "karma": "^6.3.9",
+        "karma-chrome-launcher": "~3.1.0",
+        "karma-coverage-istanbul-reporter": "~3.0.2",
+        "karma-jasmine": "~4.0.0",
+        "karma-jasmine-html-reporter": "^1.7.0",
+        "ng-packagr": "^13.0.3",
+        "ngx-bootstrap": "^6.2.0",
+        "protractor": "~7.0.0",
+        "replace-in-file": "^6.3.2",
+        "rxjs": "^7.4.0",
+        "ts-node": "^10.3.0",
+        "tslib": "^2.3.1",
+        "tslint": "~6.1.0",
+        "typescript": "~4.4.4",
+        "zone.js": "~0.11.4"
+    }
 }
